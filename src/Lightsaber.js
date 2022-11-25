@@ -6,15 +6,48 @@ source: https://sketchfab.com/3d-models/sith-lightsaber-construstion-draft-0d9b7
 title: Sith lightsaber construstion draft
 */
 
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
+import { useControls } from "leva";
 
 export default function Lightsaber(props) {
     const group = useRef();
+    const saberRef = useRef()
+
     const { nodes, materials, animations } = useGLTF(
         "./models/lightsaber.glb"
     );
     const { actions } = useAnimations(animations, group);
+
+    // Debug 
+    const toRGBArray = rgbStr => rgbStr.match(/\d+/g).map(Number);
+
+    const debug = useControls({ 
+        color: {
+            value: { r: 3, g: 0, b: 0 },
+            // onChange: (v) => {
+            //     // imperatively update the world after Leva input changes
+            //     console.log(v)
+            //     const RGBArray = toRGBArray(`rgb(${v.r}, ${v.g}, ${v.b})`)
+            //     // const RGBArray = toRGBArray(v)
+            //     const newColor = RGBArray.map(i => i / 255)
+            //     console.log(newColor, 'changed');
+            //     saberRef.current.material.color = newColor
+            // }
+        },
+        intensity: {
+            value: 365,
+            min: 0,
+            max: 1000,
+            step: 0.1
+        }
+    })
+    useEffect(() => console.log([
+        (debug.color.r / 255) * debug.intensity,
+        (debug.color.g / 255) * debug.intensity,
+        (debug.color.b / 255 ) * debug.intensity
+]), [])
+
     return (
         <group 
             ref={group} 
@@ -701,7 +734,7 @@ export default function Lightsaber(props) {
                                         material={materials.metal}
                                     />
                                 </group>
-                                <group
+                                {/* <group
                                     name="pCylinder282"
                                     position={[0, 4.02, 0]}
                                     scale={[0.53, 17.09, 0.53]}
@@ -713,7 +746,7 @@ export default function Lightsaber(props) {
                                         geometry={nodes.pCylinder282_saber_outer_0.geometry}
                                         material={materials.saber_outer}
                                     />
-                                </group>
+                                </group> */}
                                 <group
                                     name="pCylinder283"
                                     position={[1.08, 4.48, 0.01]}
@@ -1057,7 +1090,30 @@ export default function Lightsaber(props) {
                                         material={materials.phongE1}
                                     />
                                 </group>
+{/* crystal tube */}
+                                {/* <pointLight /> */}
                                 <group
+                                    name="pCylinder282"
+                                    position={[0, 4.02, 0]}
+                                    scale={[0.53, 17.09, 0.53]}
+                                >
+                                    <mesh
+                                        ref={saberRef}
+                                        name="pCylinder282_saber_outer_0"
+                                        geometry={nodes.pCylinder282_saber_outer_0.geometry}
+                                        // material={materials.saber_outer}
+                                    >
+                                        <meshBasicMaterial 
+                                            color={ [
+                                                (debug.color.r / 255) * debug.intensity,
+                                                (debug.color.g / 255) * debug.intensity,
+                                                (debug.color.b / 255 ) * debug.intensity
+                                            ] } 
+                                            toneMapped={ false } 
+                                        />
+                                    </mesh>
+                                </group>
+                                {/* <group
                                     name="pCylinder287"
                                     position={[0, 4.02, 0]}
                                     scale={[0.7, 16.76, 0.7]}
@@ -1069,7 +1125,10 @@ export default function Lightsaber(props) {
                                         geometry={nodes.pCylinder287_saber_inner_0.geometry}
                                         material={materials.saber_inner}
                                     />
-                                </group>
+                                </group> */}
+
+ {/* end crystal tube */}
+
                                 <group name="part_crystal2" position={[0, -2.13, 0]}>
                                     <mesh
                                         name="part_crystal2_phongE1_0"

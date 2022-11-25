@@ -1,5 +1,6 @@
 import { OrbitControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
+import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import { Perf } from "r3f-perf";
 import { useRef } from "react";
 import Lightsaber from "./Lightsaber";
@@ -21,6 +22,11 @@ function App() {
 
 		<directionalLight castShadow position={[1, 2, 3]} intensity={1.5} />
 		<ambientLight intensity={0.5} />
+
+		<EffectComposer>
+			<Bloom />
+		</EffectComposer>
+
 
 		<Lightsaber />
 

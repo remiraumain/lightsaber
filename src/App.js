@@ -2,6 +2,7 @@ import { OrbitControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { Perf } from "r3f-perf";
 import { useRef } from "react";
+import Lightsaber from "./Lightsaber";
 
 function App() {
 	const cube = useRef()
@@ -16,10 +17,14 @@ function App() {
 
 		<OrbitControls makeDefault />
 
+		<color args={ [ "#040404" ] } attach="background" />
+
 		<directionalLight castShadow position={[1, 2, 3]} intensity={1.5} />
 		<ambientLight intensity={0.5} />
 
-		<mesh ref={cube} castShadow >
+		<Lightsaber />
+
+		<mesh ref={cube} castShadow position={ [ 2, 0, 0 ] } >
 			<boxGeometry />
 			<meshStandardMaterial color="mediumpurple" />
 		</mesh>

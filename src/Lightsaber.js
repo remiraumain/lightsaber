@@ -6,11 +6,12 @@ source: https://sketchfab.com/3d-models/sith-lightsaber-construstion-draft-0d9b7
 title: Sith lightsaber construstion draft
 */
 
-import React, { useEffect, useRef } from "react";
+import React, { forwardRef, useEffect, useRef } from "react";
 import { useGLTF, useAnimations, useHelper } from "@react-three/drei";
-import { folder, useControls } from "leva";
+import { useControls } from "leva";
+import { useFrame } from "@react-three/fiber";
 
-export default function Lightsaber(props) {
+const Lightsaber = forwardRef((props, ref) => {
     const group = useRef();
     const saberRef = useRef()
     const saberLightRef = useRef()
@@ -20,16 +21,17 @@ export default function Lightsaber(props) {
     );
     const { actions } = useAnimations(animations, group);
 
+
     // Debug 
     const rgbToHex = (rgb) => "#" + (1 << 24 | rgb.r << 16 | rgb.g << 8 | rgb.b).toString(16).slice(1)
 
     const debug = {
         general: useControls('General', {
             scale: {
-                value: 0.1,
-                min: 0.01,
-                max: 1,
-                step: 0.01
+                value: 1,
+                min: 0.1,
+                max: 10,
+                step: 0.1
             },
             onOff: { options: [ 'on', 'off' ] },
         }),
@@ -44,26 +46,44 @@ export default function Lightsaber(props) {
                 step: 0.1
             },
             intensity: {
-                value: 10,
+                value: 1000,
                 min: 0,
                 max: 5000,
                 step: 0.1
             }
-        })
+        }), 
+        animations: useControls('Animations', {
+            rotate: { options: [ 'on', 'off' ] },
+            speed: {
+                value: 0.1,
+                min: 0,
+                max: 10,
+                step: 0.01
+            },
+        }),
     }
 
     // console.log(debug.general.onOff)
 
     // useHelper(saberLightRef, THREE.PointLightHelper, 1)
+    
+    // Animations
+    useFrame((state, delta) => 
+	{
+        if(debug.animations.rotate === 'on') 
+        {
+            group.current.rotation.y += delta * debug.animations.speed
+        }
+	})
 
     return (
         <group 
-            ref={group} 
+            ref={ref} 
             scale={ debug.general.scale }
             {...props} 
             dispose={null}
         >
-            <group name="Sketchfab_Scene">
+            <group ref={group} name="Sketchfab_Scene">
                 <group
                     name="Sketchfab_model"
                     position={[0.19, 12.35, -12.33]}
@@ -1099,12 +1119,14 @@ export default function Lightsaber(props) {
                                     />
                                 </group>
 {/* crystal tube */}
-                                <pointLight 
-                                    ref={saberLightRef} 
-                                    color={ rgbToHex(debug.blade.color) } 
-                                    intensity={ debug.blade.intensity } 
-                                    position={ [ 0, 17, 0 ] }
-                                />
+                                { debug.general.onOff === 'on' ?
+                                    <pointLight 
+                                        ref={saberLightRef} 
+                                        color={ rgbToHex(debug.blade.color) } 
+                                        intensity={ debug.blade.intensity } 
+                                        position={ [ 0, 17, 0 ] }
+                                    /> : null
+                                }
                                 <group
                                     name="pCylinder282"
                                     position={[0, 4.02, 0]}
@@ -2552,6 +2574,8 @@ export default function Lightsaber(props) {
             </group>
         </group>
     );
-}
+})
 
 useGLTF.preload("./models/lightsaber.glb");
+
+export default Lightsaber

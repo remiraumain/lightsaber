@@ -1,18 +1,15 @@
-import { OrbitControls } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { OrbitControls, useHelper } from "@react-three/drei";
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import { Perf } from "r3f-perf";
 import { useRef } from "react";
 import Lightsaber from "./Lightsaber";
+import * as THREE from 'three'
 
 function App() {
-	const cube = useRef()
+	const directionalLightRef = useRef()
 
-	useFrame((state, delta) => 
-	{
-		cube.current.rotation.y += delta
-	})
-
+	// useHelper(directionalLightRef, THREE.DirectionalLightHelper, 1)
+    
 	return <>
 		<Perf position="top-left" />
 
@@ -20,7 +17,7 @@ function App() {
 
 		<color args={ [ "#040404" ] } attach="background" />
 
-		<directionalLight castShadow position={[1, 2, 3]} intensity={1.5} />
+		<directionalLight ref={directionalLightRef} castShadow position={[10, 30, 30]} intensity={1.5} />
 		<ambientLight intensity={0.5} />
 
 		<EffectComposer>
@@ -30,15 +27,10 @@ function App() {
 
 		<Lightsaber />
 
-		<mesh ref={cube} castShadow position={ [ 2, 0, 0 ] } >
-			<boxGeometry />
-			<meshStandardMaterial color="mediumpurple" />
-		</mesh>
-
-		<mesh receiveShadow position-y={- 1.25}>
+		{/* <mesh receiveShadow position-y={- 1.25}>
 			<boxGeometry args={[10, 0.5, 10]} />
 			<meshStandardMaterial color="greenyellow" />
-		</mesh>
+		</mesh> */}
 	</>
 }
 

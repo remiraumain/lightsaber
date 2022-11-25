@@ -7,51 +7,59 @@ title: Sith lightsaber construstion draft
 */
 
 import React, { useEffect, useRef } from "react";
-import { useGLTF, useAnimations } from "@react-three/drei";
-import { useControls } from "leva";
+import { useGLTF, useAnimations, useHelper } from "@react-three/drei";
+import { folder, useControls } from "leva";
 
 export default function Lightsaber(props) {
     const group = useRef();
     const saberRef = useRef()
-
+    const saberLightRef = useRef()
+    
     const { nodes, materials, animations } = useGLTF(
         "./models/lightsaber.glb"
     );
     const { actions } = useAnimations(animations, group);
 
     // Debug 
-    const toRGBArray = rgbStr => rgbStr.match(/\d+/g).map(Number);
+    const rgbToHex = (rgb) => "#" + (1 << 24 | rgb.r << 16 | rgb.g << 8 | rgb.b).toString(16).slice(1)
 
-    const debug = useControls({ 
-        color: {
-            value: { r: 3, g: 0, b: 0 },
-            // onChange: (v) => {
-            //     // imperatively update the world after Leva input changes
-            //     console.log(v)
-            //     const RGBArray = toRGBArray(`rgb(${v.r}, ${v.g}, ${v.b})`)
-            //     // const RGBArray = toRGBArray(v)
-            //     const newColor = RGBArray.map(i => i / 255)
-            //     console.log(newColor, 'changed');
-            //     saberRef.current.material.color = newColor
-            // }
-        },
-        intensity: {
-            value: 365,
-            min: 0,
-            max: 1000,
-            step: 0.1
-        }
-    })
-    useEffect(() => console.log([
-        (debug.color.r / 255) * debug.intensity,
-        (debug.color.g / 255) * debug.intensity,
-        (debug.color.b / 255 ) * debug.intensity
-]), [])
+    const debug = {
+        general: useControls('General', {
+            scale: {
+                value: 0.1,
+                min: 0.01,
+                max: 1,
+                step: 0.01
+            },
+            onOff: { options: [ 'on', 'off' ] },
+        }),
+        blade: useControls('Blade', {
+            color: {
+                value: { r: 3, g: 0, b: 0 },
+            },
+            glow: {
+                value: 365,
+                min: 0,
+                max: 1000,
+                step: 0.1
+            },
+            intensity: {
+                value: 10,
+                min: 0,
+                max: 5000,
+                step: 0.1
+            }
+        })
+    }
+
+    // console.log(debug.general.onOff)
+
+    // useHelper(saberLightRef, THREE.PointLightHelper, 1)
 
     return (
         <group 
             ref={group} 
-            scale={ 0.1 }
+            scale={ debug.general.scale }
             {...props} 
             dispose={null}
         >
@@ -1091,11 +1099,16 @@ export default function Lightsaber(props) {
                                     />
                                 </group>
 {/* crystal tube */}
-                                {/* <pointLight /> */}
+                                <pointLight 
+                                    ref={saberLightRef} 
+                                    color={ rgbToHex(debug.blade.color) } 
+                                    intensity={ debug.blade.intensity } 
+                                    position={ [ 0, 17, 0 ] }
+                                />
                                 <group
                                     name="pCylinder282"
                                     position={[0, 4.02, 0]}
-                                    scale={[0.53, 17.09, 0.53]}
+                                    scale={ debug.general.onOff === 'on' ? [0.53, 17.09, 0.53] : [0.53, 0, 0.53] }
                                 >
                                     <mesh
                                         ref={saberRef}
@@ -1105,9 +1118,9 @@ export default function Lightsaber(props) {
                                     >
                                         <meshBasicMaterial 
                                             color={ [
-                                                (debug.color.r / 255) * debug.intensity,
-                                                (debug.color.g / 255) * debug.intensity,
-                                                (debug.color.b / 255 ) * debug.intensity
+                                                (debug.blade.color.r / 255) * debug.blade.glow,
+                                                (debug.blade.color.g / 255) * debug.blade.glow,
+                                                (debug.blade.color.b / 255 ) * debug.blade.glow
                                             ] } 
                                             toneMapped={ false } 
                                         />
